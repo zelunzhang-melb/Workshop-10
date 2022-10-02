@@ -30,15 +30,14 @@ click so the player can aim. If you're not sure how to get the mouse position,
 remember to check the [relevant Unity docs](https://docs.unity3d.com/ScriptReference/Input.html).
 
 Note that the mouse position is in _pixel coordinates_, but the game is played
-in the x-z plane in _world coordinates_. This is where skills learned
-in project 1 should come in handy. You’ll need to pick a position in the world 
+in the x-z plane in _world coordinates_. You’ll need to pick a position in the world 
 based on the mouse click, and use the difference between this position and the 
 player position to determine the direction for the projectile to move.
 
 > **Note**<br>
-> There's no need to re-invent the wheel here! Unity comes with a `Plane` class that
-> can be queried for a ray cast automatically. Check out [this](https://docs.unity3d.com/ScriptReference/Plane.Raycast.html) page
-> for a very relevant example if you are stuck.
+> There's no need to re-invent the wheel here! Unity comes with a [`Plane`](https://docs.unity3d.com/ScriptReference/Plane.html) class that
+> can be queried for ray intersection out-of-the-box. There's also a [`ScreenPointToRay()`](https://docs.unity3d.com/ScriptReference/Camera.ScreenPointToRay.html)
+> method in the `Camera` class. 
 
 #### 2. Enemy defenses
 
@@ -59,8 +58,7 @@ some health like the enemies, and similarly, ensure there's a dramatic explosion
 that accompanies the player's demise! Remember to re-use existing game logic where possible. 
 For example, there is already a player projectile prefab which could
 be copied to create the enemy projectile, and the corresponding `ProjectileController`
-component should also be reusable via tuning of the serialised fields. Health
-tracking functionality is also very much re-usable.
+component should also be reusable via tuning of the serialised fields. 
 
 #### 3. Simple animation: Rotate to aim
 
@@ -86,12 +84,15 @@ between a number of discrete states spanning more than one frame. State switches
 based on a condition (e.g., player proximity, enemy's health), 
 or simply a time interval.
 For our enemy cubes, we will call the random interval
-between firing projectiles the "idle state". Then, rather than an attack
-being instantaneous, a new "attack state" will involve the enemy rotating to face
-the player for a second or so before firing a projectile. At this point the enemy
+between firing projectiles the "idle state". Instead of continuously rotating to
+aim towards the player, enemies should simply look "forward" in this state. 
+Then, rather than an attack
+being instantaneous, we enter an "attack state" which involves the enemy rotating to face
+the player before firing a projectile. At this point the enemy
 re-enters the idle state, returning to a _neutral_ "forward" aim, and the process repeats.
 
-Your task is to facilitate this aim-first, _then_ fire behaviour. Note that sequencing
+Your task is to facilitate this aim-first, _then_ fire behaviour. The sequence should be
+no longer than a second or so. Note that sequencing
 enemy attacks like can be useful for more than adding a bit of "polish". It can
 also make random elements less frustrating for the player since there's a bit
 of notice before a projectile comes flying! 
@@ -99,7 +100,7 @@ of notice before a projectile comes flying!
 For an extra challenge, modify the `LookRotation` component from the previous task to 
 _interpolate_ rotation such that it rotates towards the target "forward" vector over
 a number of frames. The [`Vector3.RotateTowards()`](https://docs.unity3d.com/ScriptReference/Vector3.RotateTowards.html)
-method could help here.
+method could assist here.
 This way enemies won't suddenly _snap_ to rotate towards the player when their
 state changes from "idle" to "attack".
 
@@ -110,29 +111,28 @@ state changes from "idle" to "attack".
 > `EnemyController` class that
 > maintains the current state, which is _switched_ via a coroutine, but
 > accessible within the `Update()` method.
-> This is useful if some state-dependent behaviour should occur every frame
-> (rather than trying to wedge it into the coroutine sequence, which can
-> also be messy in itself).
+> This is useful if some state-dependent behaviour should occur every frame.
 
 #### 5. Make things a bit more 21st century (challenge + extension)
 
 Our _Cube Invaders_ game is currently a bit of an odd mix in terms of look and feel. 
 The enemy cube
-swarm moves like one you'd see in a 70s game arcade, yet is rendered in three-dimensions
-using modern lighting/rendering techniques. We also modified the player and enemy cubes to
-smoothly rotate and fire, adding to the inconsistent feel. 
+swarm moves like one you'd see in a 70's game arcade, yet is rendered in three-dimensions
+using "modern" lighting/rendering techniques. The smooth rotate-to-aim 
+mechanic also arguably adds to the inconsistent feel, albeit to a lesser extent. We will now 
+commit to a more consistent style, and polish the game dynamics 
+accordingly. The game will still be a homage to space invaders though, and the overall
+swarm stepping _sequence_ will remain!
 
-We will now commit to a more consistent style, and polish the game dynamics 
-accordingly. The game will still be a
-homage to space invaders, but with a more modern twist. Before continuing, it might 
-be worth having a high-level read of the Unity physics engine documentation for
-[three-dimensional projects](https://docs.unity3d.com/Manual/PhysicsOverview.html). Some of these
-topics we've already discussed, but not all. Sometimes it is what you don't know is available or
-possible out-of-the-box that ends up unnecessarily wasting your time. 
+> **Note**<br>
+> Before continuing, it might 
+> be worth skimming over the Unity physics engine [documentation](https://docs.unity3d.com/Manual/PhysicsOverview.html). 
+> Some of these topics we've already discussed, but not all, especially not in
+> significant detail. Keep these docs on hand in case you need to look anything up.
 
-Instead of using colliders as triggers, we will begin by adding `Rigidbody` components 
-to the game entities
-such that they are controlled by the Unity physics engine. This will require some 
+Instead of using colliders as _triggers_ to simply detect collisions, 
+we will add `Rigidbody` components to the respective game objects/prefabs
+so that they are controlled by the Unity physics engine. This will require some 
 major refactoring of existing components, so we have to do this 
 slowly and _repeatedly test_ (see the dot points below for a suggested order).
 In particular, you will have to be careful with how objects are moved and controlled.
@@ -153,14 +153,14 @@ refactored.
 
 > **Warning** <br>
 > The Unity physics engine operates in a distinct _fixed_
-> update cycle. It's possible to have physics updates zero, one _or more_
+> update cycle. It's possible for physics updates to occur zero, one _or more_
 > times in-between individual `Update()` calls! You can directly hook into these updates
 > using an alternative method called [`FixedUpdate()`](https://docs.unity3d.com/ScriptReference/MonoBehaviour.FixedUpdate.html)
-> but be careful -- it's sometimes **unreliable** to check for user input here, since frame-reliant methods like
-> `Input.GetKeyDown()` are linked to the ordinary update cycle.
+> but be careful -- it's **unreliable** to check for user input here, since frame-reliant methods like
+> `Input.GetKeyDown()` are linked to the ordinary (render) update cycle.
 
 Your (very big) task is to attempt the following modifications:
-- Add a `Rigidbody` to the enemy prefab. Instead of the enemy swarm directly arranging
+- Add a `Rigidbody` to the enemy prefab. Instead of the swarm manager directly arranging
   these prefabs in a grid formation, it should first instantiate _invisible_ "enemy slot" 
   objects in their place. Make these have _kinematic_ rigidbodies 
   and ensure there is no associated collider. 
@@ -172,38 +172,42 @@ Your (very big) task is to attempt the following modifications:
 - Randomise the `spring` parameter for each slot such that enemies move ever-so-slightly
   out of sync. This should make the swarm movement look a little less artificial.
 - Modify how enemies are spawned so that they aren't all instantiated at once, but instead
-  progressively with a short interval between. Instantiate them outside of the viewport to 
+  progressively, with a very short interval between. Instantiate them outside of the viewport to 
   make it appear as though they are "flying into place". Because of the newly added spring mechanics,
   the physics engine will take care of smooth movement towards the respective enemy slot.
-- We'll next add rigidbodies to projectiles. Before doing this, 
-  [create two layers](https://docs.unity3d.com/Manual/Layers.html) to separate
+- [Create two layers](https://docs.unity3d.com/Manual/Layers.html) to separate
   "enemy objects" and "player objects". Layers can be used in many different contexts,
   but one useful application of them is to prevent physics collisions between sets of
   objects belonging to a "team" (e.g. friendly fire). Configure the [layer collision matrix](https://docs.unity3d.com/Manual/LayerBasedCollision.html) 
   to prevent self-collision of enemy objects and player objects. Ensure the layers
   are appropriately set to player/enemy objects going forward.
-- Add a `Rigidbody` to enemy projectiles and utilise [`OnCollisionEnter()`](https://docs.unity3d.com/ScriptReference/Collider.OnCollisionEnter.html) 
-  instead of `OnTriggerEnter()` to hook into the physical collision events. Exploit collision 
+- Modify the existing projectile prefab `Rigidbody` to no longer be kinematic, and 
+  _initialise_ its velocity via the rigidbody instead of manually moving it each frame.
+  In the `ProjectileController` component, utilise [`OnCollisionEnter()`](https://docs.unity3d.com/ScriptReference/Collider.OnCollisionEnter.html) 
+  instead of `OnTriggerEnter()` to hook into physical collision events. Exploit collision 
   [contact data](https://docs.unity3d.com/ScriptReference/Collision-contacts.html) passed 
   to this method to orient particle effects in the direction of the first hit-point normal.
   Verify that the projectiles visibly displace enemy cubes when they are hit but not
   destroyed. (The spring joint should then quickly move them back into place.)
 - Now do the same for player projectiles. In theory, this shouldn't be much work if
   re-usable component design has been employed up until this point.
-- Finally, add a `Rigidbody` to the player cube. Responsive movement without directly
-  modifying the transform will be the challenge here. You can try applying a force
-  in response to user input, but it might also make sense to adopt a similar strategy to
-  enemy movement via a spring joint (move a kinematic target based on user input, and
-  have the player cube follow via the joint).
+- Add a `Rigidbody` to the player cube, and modify player input such that
+  it indirectly moves the player via the rigidbody. There are various techniques
+  you can use here, including simply applying a force to the rigidbody, but for consistency,
+  you could use a player-controlled "target" spring joint, similar to the enemy slot mechanism.
 - Refactor the `LookDirection` component into a `RigidbodyLookDirection` component
   that applies torque to a cube to rotate it. You'll
   need to take care to reduce the torque as the rotation gets closer to the target.
-- Add a bit more polish to the enemy attack sequence. At the moment the enemies fire
+- Add more polish to the enemy attack sequence. At the moment enemies at the back may fire
   projectiles _through_ other enemies, due to the use of layering. This works, but
-  looks a bit strange. To fix it, make enemies "lunge" or "jump" upwards before quickly
-  firing at the player. Remember that their motion is constrained by the spring joint,
-  so simply applying an upwards force should be sufficient to control the motion. The tricky
-  bit is detecting when they've reached the peak of their motion (the crude fix is to
+  looks a bit strange. To make it more believable, make enemies "lunge" or "jump" to
+  fire projectiles at the player with a bit of elevation. The end goal is to ensure projectiles 
+  fly _over_ any enemies in front (of course, the gameplay is no longer strictly
+  2D at this point).
+  Remember that enemy motion is also controlled by a spring joint,
+  so you may simply apply large _initial_ upwards force/impulse, then let the joint take
+  care of the rest. The tricky bit will be detecting the peak of the lunge motion in 
+  order to time firing of the projectile (a quick and dirty solution is to
   just add a delay, but try to do this properly for an extra challenge).
 - You may have noticed physics-engine controlled motion sometimes looks a little jittery. 
   This is likely due to the separate fixed update loop being out of sync with the render update loop. 
