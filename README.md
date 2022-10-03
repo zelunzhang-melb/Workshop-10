@@ -11,7 +11,7 @@ The goal will be to create something playable and even somewhat challenging. You
 refine the game dynamics and add a bit of polish via much greater use of the Unity physics engine.
 
 <p align="center">
-  <img src="Gifs/task_5.gif">
+  <img src="Gifs/game.gif">
 </p>
 
 > **Note**<br>
@@ -39,6 +39,10 @@ player position to determine the direction for the projectile to move.
 > can be queried for ray intersection out-of-the-box. There's also a [`ScreenPointToRay()`](https://docs.unity3d.com/ScriptReference/Camera.ScreenPointToRay.html)
 > method in the `Camera` class. 
 
+<p align="center">
+  <img src="Gifs/task_1.gif">
+</p>
+
 #### 2. Enemy defenses
 
 Presently, the enemy cube swarm isn't exactly formidable. Your next task is to make enemies
@@ -60,6 +64,10 @@ For example, there is already a player projectile prefab which could
 be copied to create the enemy projectile, and the corresponding `ProjectileController`
 component should also be reusable via tuning of the serialised fields. 
 
+<p align="center">
+  <img src="Gifs/task_2.gif">
+</p>
+
 #### 3. Simple animation: Rotate to aim
 
 Your next task is to rotate both the player and the enemy cubes such that 
@@ -75,6 +83,10 @@ This should contain a `forward` vector as a serialised field, which is also
 updatable by a component that has a reference to it (e.g., a setter method). Ensure
 both the `PlayerController` and `EnemyController` classes get respective references
 so that the aim rotation can be updated every frame, via this method.
+
+<p align="center">
+  <img src="Gifs/task_3.gif">
+</p>
 
 
 #### 4. More stateful behaviour: Aim first, _then_ fire!
@@ -112,6 +124,10 @@ state changes from "idle" to "attack".
 > maintains the current state, which is _switched_ via a coroutine, but
 > accessible within the `Update()` method.
 > This is useful if some state-dependent behaviour should occur every frame.
+
+<p align="center">
+  <img src="Gifs/task_4.gif">
+</p>
 
 #### 5. Make things a bit more 21st century (challenge + extension)
 
@@ -220,5 +236,11 @@ Your (very big) task is to attempt the following modifications:
 
 It's unlikely you'll complete all of these modifications
 during the workshop, so continue to work on them over the next week, and of course,
-check out the sample solution when it is made available. Next time, 
-we'll round off the gameplay elements workshops by adding some user interfaces!
+check out the sample solution when it is made available (sneak peak in the following gif --
+feel free to use it as a rough guide of what to aim for).
+
+<p align="center">
+  <img src="Gifs/task_5.gif">
+</p>
+
+Next time, we'll round off the gameplay elements workshops by adding some user interfaces!
