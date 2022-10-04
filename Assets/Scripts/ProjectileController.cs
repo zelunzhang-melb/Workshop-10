@@ -8,13 +8,24 @@ public class ProjectileController : MonoBehaviour
     [SerializeField] private Vector3 velocity;
     [SerializeField] private ParticleSystem collisionParticles;
 
+    [SerializeField] private float speed = 40f;
+
     [SerializeField] private int damageAmount = 50;
     [SerializeField] private string tagToDamage;
+
+    public void Initiation(Vector3 direction)
+    {
+        velocity = direction.normalized * speed;
+    }
 
     private void Update()
     {
         transform.Translate(this.velocity * Time.deltaTime);
     }
+
+    
+
+
 
     private void OnTriggerEnter(Collider col)
     {

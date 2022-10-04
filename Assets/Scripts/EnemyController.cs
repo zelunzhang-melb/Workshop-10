@@ -2,13 +2,45 @@
 // (c) University of Melbourne, 2022
 
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(MeshRenderer))]
 public class EnemyController : MonoBehaviour
 {
     [SerializeField] private ParticleSystem deathEffect;
-    
+    [SerializeField] ProjectileController projectilePrefeb;
+    [SerializeField] float maxShootDelay = 10f;
+    [SerializeField] float minShootDelay = 5f;
+
     private MeshRenderer _renderer;
+
+
+    private void Start()
+    {
+        StartCoroutine(ShootCoroutine());
+    }
+
+    private IEnumerator ShootCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(Random.Range(minShootDelay, maxShootDelay));
+
+            var player = FindObjectOfType<PlayerController>();
+            if (player != null)
+            {
+                var aimDirection = (player.transform.position - transform.transform.position).normalized;
+
+                var projectile = Instantiate(projectilePrefeb);
+                projectile.transform.position = transform.position;
+                projectile.Initiation(aimDirection);
+            }
+
+            
+
+
+        }
+    }
 
     private void Awake()
     {
